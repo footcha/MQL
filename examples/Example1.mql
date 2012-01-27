@@ -1,0 +1,28 @@
+Name = TGT_DESCRIPTIONS_PFX_SYS
+Target = TARGET_TABLE
+-- Name <<= FileNameBase
+-- Name <<= CreateFileNameByConvention
+Historization = SCD1
+Transformation
+SELECT
+  LANG_K.LANG_ID         AS LANG_ID =>> HistorizationKey --(alias HK)
+, Descriptions.NAME      AS LANG_CD =>> HistorizationKey --(alias HK)
+, Descriptions.VALUE     AS LANG_NMCZ
+, Descriptions_Eng.VALUE AS LANG_NMEN
+, Descriptions.TEXT      AS LANG_DSCCZ
+, Descriptions_Eng.TEXT  AS LANG_DSCEN
+, Descriptions.ORDER_BY  AS SRT_SEQ
+FROM
+Descriptions =>> MainSource
+*** STAGE ***
+LEFT JOIN Descriptions as Descriptions_Eng
+ on  Descriptions_Eng.CODE = Descriptions.CODE
+ and Descriptions_Eng.LANG_ID = 'EN'
+*** TARGET ***
+LEFT JOIN LANG_K
+ on  LANG_K.SRC_ID = Descriptions.CODE
+ and LANG_K.SRC_SYS_ID = $SOURCE_SYSTEM_KEY and LANG_K.SRC_PFX_CD = 'L'
+WHERE
+and LANG_ID = 'CS' AND TYPE_ = 'BILLING_LANG'
+*** Increment filter ***
+$MainSource.UPD_DTTM = $$LOAD_DTTM
