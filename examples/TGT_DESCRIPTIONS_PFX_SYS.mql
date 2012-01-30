@@ -1,0 +1,63 @@
+*** System ***
+-- System section probably is not needed. Its parameters can be stored during saving the file elsewhere.
+languageVersion = 1.0 --> every object can contain descriptions
+
+*** (Transformation) Parameters ***
+MappingName = ! Conventions.MappingName --default
+-- MappingName = TGT_DESCRIPTIONS_PFX_SYS
+-- MappingName = ! IO.FileNameBase
+TargetTable = ! Conventions.TargetTable --default
+Difficulty = MiddleLow
+Historization.Type = SCD1
+Historization.Key  = LANG_ID
+Historization.Key += LANG_CD
+--Historization.Key = LANG_ID + LANG_CD
+Historization = (
+    Type = SCD1
+	Key = LANG_ID --> Description explaining purpose of this column for historization
+	Key += LANG_CD -- This description is ignored by a parser
+	Key = LANG_ID + LANG_CD
+)
+
+*** Transformation ***
+SELECT
+  LANG_K.LANG_ID         AS LANG_ID => (Historization.Key --> /* Description explaining purpose
+                                                                 of this column for historization */ )
+                                    --> Description explaining this column
+									--> and second description line
+, Translations.NAME      AS LANG_CD -> Historization.Key --(alias HK), second HK overrides first or is appended???
+, Translations.VALUE -> 'Metadata in STAGE column' --this metadata is scoped only to this mapping
+                         AS LANG_NMCZ -> 'Metadata in TARGET column'
+, Translations_Eng.VALUE AS LANG_NMEN
+, Translations.TEXT      AS LANG_DSCCZ
+, Translations_Eng.TEXT  AS LANG_DSCEN
+, Translations.ORDER_BY  AS SRT_SEQ
+FROM
+Translations => MainSource
+** STAGE ** --section is not necessary if stage and target models are fully loaded
+            --or if conventions for STAGE and TARGET are defined
+LEFT JOIN Translations as Translations_Eng -> 'Denormalization table' --multi-word label
+                                           -> SecondSource
+										   -> StageTable  --not necessary when STAGE section is specified.
+										                  --Additionally, it overrides section specified
+														  --so that i.e. TARGET table can be specified
+														  --within STAGE section (not recommneded)
+ on  Translations_Eng.CODE = Translations.CODE
+ and Translations_Eng.LANG_ID = 'EN'
+** TARGET **
+LEFT JOIN LANG_K => OperationKeyTable --this is a first-class definition of operation key transformation
+ on  LANG_K.SRC_ID = Translations.CODE
+ and LANG_K.SRC_SYS_ID = $SOURCE_SYSTEM_KEY and LANG_K.SRC_PFX_CD = 'L'
+LEFT JOIN OperationKey FROM Customer AS cust1
+ ON   Id = MainSource.Id
+    , Prefix = 'CU'
+    , System = $System
+LEFT JOIN OperationKey FROM CustomerKeyMapping AS cust1
+ ON   Id = $MainSource.Id
+    , Prefix = 'CU' --default is equality to constant defined in operation key mapping if it is constant there
+    , System = $System  --default is equality to constant defined in operation key mapping if it is constant there
+	--, System = IGNORE
+WHERE
+LANG_ID = 'CS' AND TYPE_ = 'BILLING_LANG'
+INCREMENT FILTER
+$MainSource.UPD_DTTM = $LOAD_DTTM /* LOAD_DTTM is registered command */ and $MainSource.ACTIVE_FLAG = 1

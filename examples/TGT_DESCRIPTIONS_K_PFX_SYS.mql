@@ -1,0 +1,17 @@
+*** (Transformation) Parameters ***
+MappingName = ! Conventions.MappingName  --default
+Target = ! Conventions.OperationKeyTable --default
+Difficulty = Low --default for operation key transformation
+Historization.Type = SCD0I
+
+*** Transformation ***
+Pattern = OperationKey
+--Prefix = L
+--SourceSystem = $CustomerSystem
+
+--rest of this transformation definition is the default definition of OperationKey pattern
+--pattern definition or part of it can be overridden
+SELECT *
+FROM ! Conventions.MainTransformation
+INCREMENT FILTER
+$MainSource.INS_DTTM = $LOAD_DTTM
