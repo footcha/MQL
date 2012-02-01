@@ -24,10 +24,10 @@ with multiline description
 }
 
 # (Transformation) Parameters
-MappingName = ! Conventions.MappingName --default
+MappingName = !!Conventions.MappingName --default
 -- MappingName = TGT_DESCRIPTIONS_PFX_SYS
--- MappingName = ! IO.FileNameBase
-TargetTable = ! Conventions.TargetTable --default
+-- MappingName = !! IO.FileNameBase
+TargetTable = !!Conventions.TargetTable --default
 Difficulty = MiddleLow
 Difficulty = Middle low -- syntactic sugar for MiddleLow
 Historization.Type = SCD1
@@ -44,20 +44,20 @@ Historization = {
 # Transformation
 Transformation.Definition = {
 SELECT
-  LANG_K.LANG_ID         AS LANG_ID => { Historization.Key --> { Description explaining purpose
+  LANG_K.LANG_ID         AS LANG_ID  => { Historization.Key --> { Description explaining purpose
                                                                 of this column for historization }}
-									--> and second description line
                                     --> Description explaining this column
 									    -- syntactic sugar for => Description += free text
-									=>  MarkerTag --this is just a marker tag (either set or not set for the column)
-									=>  ValueTag = Tag with value assigned to it
+									--> and second description line
+									 => MarkerTag --this is just a marker tag (either set or not set for the column)
+									 => ValueTag = Tag with value assigned to it
 									               -- this ValueTag (name is defined by a user) is
-												   -- related to the column, it is a marker
-												   -- and contains a value
-				                    !=> ValueTag -- unsets the ValueTag
-, Translations.NAME      AS LANG_CD => Historization.Key --(alias HK), second HK overrides first or is appended???
-, Translations.VALUE => 'Metadata in STAGE column' --this metadata is scoped only to this mapping
-                         AS LANG_NMCZ => 'Metadata in TARGET column'
+											       -- related to the column, it is a marker
+                                                   -- and contains a value
+                                    !=> ValueTag -- unsets the ValueTag
+, Translations.NAME      AS LANG_CD  => Historization.Key --(alias HK), second HK overrides first or is appended???
+, Translations.VALUE --> Description of the column value --this description is scoped only to this mapping
+                         AS LANG_NMCZ --> Description of the column alias
 , Translations_Eng.VALUE AS LANG_NMEN
 , Translations.TEXT      AS LANG_DSCCZ
 , Translations_Eng.TEXT  AS LANG_DSCEN
@@ -68,10 +68,10 @@ Translations => MainSource
             --or if conventions for STAGE and TARGET are defined
 LEFT JOIN Translations as Translations_Eng => 'Denormalization table' --multi-word label
                                            => SecondSource
-										   => StageTable  --not necessary when STAGE section is specified.
-										                  --Additionally, it overrides section specified
-														  --so that i.e. TARGET table can be specified
-														  --within STAGE section (not recommneded)
+                                           => StageTable  --not necessary when STAGE section is specified.
+                                                          --Additionally, it overrides section specified
+                                                          --so that i.e. TARGET table can be specified
+                                                          --within STAGE section (not recommneded)
  on  Translations_Eng.CODE = Translations.CODE
  and Translations_Eng.LANG_ID = 'EN'
 ** TARGET **
@@ -86,7 +86,7 @@ LEFT JOIN OperationKey FROM CustomerKeyMapping AS cust1
  ON   Id = $MainSource.Id
     , Prefix = 'CU' --default is equality to constant defined in operation key mapping if it is constant there
     , System = $System  --default is equality to constant defined in operation key mapping if it is constant there
-	--, System = IGNORE
+    --, System = IGNORE
 WHERE
 LANG_ID = 'CS' AND TYPE_ = 'BILLING_LANG'
 INCREMENT FILTER
