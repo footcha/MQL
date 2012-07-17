@@ -20,7 +20,7 @@ class SemanticModel extends Parameters {
   }
 
   description.value.value.contains("value")
-  description.value.metadata(0).value = "new metadata value"
+  description.value.metadata(0).value = "new metadataForValue value"
   description.label.name = "new name"
   description.label.metadata
   description.label.metadata(0).value

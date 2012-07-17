@@ -3,7 +3,7 @@ package mql.model.parser
 import org.scalatest.FunSuite
 
 class CommentTest extends FunSuite {
-  val EOL = "\r\n"
+  import TestUtilities._
 
   def validate(result: Comment.ParseResult[_]) {
     import Comment._

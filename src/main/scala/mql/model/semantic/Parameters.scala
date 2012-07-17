@@ -1,5 +1,5 @@
 package mql.model.semantic
 
 trait Parameters {
-  var parameters: Seq[Parameter] = Nil
+//  var parameters: Seq[Parameter] = Nil
 }
