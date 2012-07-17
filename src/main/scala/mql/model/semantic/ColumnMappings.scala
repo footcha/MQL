@@ -5,6 +5,7 @@ import collection.mutable.HashMap
 
 trait ColumnMappings extends Iterable[ColumnMapping] {
   protected var columns = new HashMap[String, ColumnMapping]
+
   private def find(column: Column): Option[ColumnMapping] = {
     columns.get(column.name)
   }

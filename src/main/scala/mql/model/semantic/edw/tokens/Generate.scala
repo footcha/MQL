@@ -1,6 +1,6 @@
 package mql.model.semantic.edw.tokens
 
-import mql.model.semantic.{SourceSystem, ColumnTransformation}
+import mql.model.semantic.{ColumnTransformation, SourceSystem}
 
 case class Generate() extends ColumnTransformation
 

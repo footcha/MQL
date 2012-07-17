@@ -54,13 +54,13 @@ class CsvFormatter(private val writer: Writer) {
     private[CsvFormatter] val buffer = HashMap[String, String]()
 
     val field = new {
-        def update(label: String, value: String) {
+      def update(label: String, value: String) {
         if (isClosed) throw new Exception("Body is closed for modifications.")
         buffer(label) = value
       }
     }
 
-    def flush(){
+    def flush() {
       newRow()
     }
   }

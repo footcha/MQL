@@ -21,5 +21,6 @@ case class AliasedColumn(table: Alias[Table], column: Alias[Column]) {
   def x: SqlConvertible = this.asInstanceOf[SqlConvertible]
 
   import AliasedColumnCompanion.aliasToSql
+
   override def toString = this.toSql
 }

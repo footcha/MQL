@@ -11,11 +11,8 @@ object AliasCompanion {
 }
 
 case class Alias[+T <: Name](entity: T, aliasTemplate: Name => String = AliasCompanion.byName)
-  extends SqlConvertible
-{
-//  def aliasTemplate: T => String = null
+  extends SqlConvertible {
 
-//  private val isAliased = aliasTemplate != AliasCompanion.byName
   val alias = aliasTemplate(entity)
 
   def toSql =

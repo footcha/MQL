@@ -5,7 +5,9 @@ import collection.mutable
 
 trait ColumnMapping extends Metadata with Comment {
   private var _mapping: Mapping = null
+
   def mapping = _mapping
+
   def mapping_=(mapping: Mapping) {
     _mapping = mapping
   }
@@ -14,9 +16,11 @@ trait ColumnMapping extends Metadata with Comment {
    * Target column
    */
   def column: Column = _column
+
   def column_=(column: Column) {
     _column = column
   }
+
   private var _column: Column = null
 
   protected val prefix = "ColumnMapping."
@@ -32,10 +36,12 @@ trait ColumnMapping extends Metadata with Comment {
   def transformation_=(value: => ColumnTransformation) {
     setMetadata("Transformation", () => value)
   }
+
   transformation = ConstantTransformation("")
 
   @deprecated
   def mappedTo: mutable.MutableList[Column] = _mappedTo
+
   @deprecated
   def mappedTo_=(columnList: mutable.MutableList[Column]) {
     _mappedTo = columnList
