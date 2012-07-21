@@ -29,7 +29,11 @@ object Column {
   }
 }
 
-class Column(name: String) extends Name {
-  super.name = name
-  var table: Table = null
+import mql.Checker._
+case class Column(override val name: String) extends Name {
+  var _table: Table = null // TODO Table is mandatory. Extend ctor with table.
+  def table = ensureNotNull(_table)
+  def table_=(table: Table) {
+    withNotNull(table) { _table = table }
+  }
 }

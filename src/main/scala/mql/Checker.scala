@@ -11,4 +11,9 @@ object Checker {
     assert(obj != null)
     function
   }
+
+  def ensureNotNull[T](obj: T): T = {
+    assert(obj != null)
+    obj
+  }
 }

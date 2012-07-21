@@ -13,7 +13,7 @@ trait Tokenized {
 }
 
 case class ConstantTransformation(constant: String) extends ColumnTransformation
-case class TokenizedTransformation(sql: String, columnsSeq: (String, AliasedColumn)*)
+case class TokenizedTransformation(sql: String, columnsSeq: (Symbol, AliasedColumn)*)
   extends ColumnTransformation with Tokenized {
   lazy val columnMap = columnsSeq.toMap
   lazy val columns= columnMap.values
@@ -21,7 +21,7 @@ case class TokenizedTransformation(sql: String, columnsSeq: (String, AliasedColu
 
 object TokenizedTransformation {
   val extract = new {
-    def unapply(t: TokenizedTransformation): Option[(String, Map[String, AliasedColumn])] = Some(t.sql, t.columnMap)
+    def unapply(t: TokenizedTransformation): Option[(String, Seq[(Symbol, AliasedColumn)])] = Some(t.sql, t.columnMap.toSeq)
   }
 }
 

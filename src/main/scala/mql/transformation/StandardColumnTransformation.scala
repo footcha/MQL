@@ -22,7 +22,7 @@ object StandardColumnTransformation {
       column = column1
       mappedTo += from.column.entity
       mappedTo += to.column.entity
-      transformation = TokenizedTransformation("", "from" -> from, "to" -> to)
+      transformation = TokenizedTransformation("", 'from -> from, 'to -> to)
     }
   }
 }

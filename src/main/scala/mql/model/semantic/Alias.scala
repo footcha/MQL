@@ -23,11 +23,18 @@ case class Alias[+T <: Name](entity: T, aliasTemplate: Name => String = AliasCom
 
   def toSql =
     if (entity.name != alias)
-      "#{object} AS #{alias}" richFormat Map(
-        "object" -> entity.name,
-        "alias" -> alias
-      )
+      "{object} AS {alias}" richFormat (
+        'object -> entity.name,
+        'alias -> alias
+        )
     else entity.name
 
   override def toString = toSql
+
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case that: Alias[_] => that.toSql == toSql
+      case _ => false
+    }
+  }
 }
