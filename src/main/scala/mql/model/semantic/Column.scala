@@ -7,11 +7,12 @@
 package mql.model.semantic
 
 object Column {
-  var name = (table: Table, name: String) => {
+  @deprecated
+  var name = (table: Table, name: String) => apply(table, name)
+
+  def apply(table: Table, columnName: String) = {
     val tableLocal = table
-    new Column(name) {
-      this.table = tableLocal
-    }
+    new Column(columnName) { this.table = tableLocal }
   }
 
   implicit def columnToSql(column: Column): SqlConvertible = {
