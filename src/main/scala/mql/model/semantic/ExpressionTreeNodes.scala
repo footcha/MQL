@@ -33,7 +33,7 @@ case class Concatenate(command1: CommandExpression, command2: CommandExpression,
 
   private[this] def concatenate():Iterable[CommandExpression] = {
     val buffer = new ListBuffer[CommandExpression]
-    buffer ++= (List(command1, command2) ++ commands) flatMap (List(_, separator))
+    buffer ++= command1 :: command2 :: commands.toList flatMap (List(_, separator))
     buffer.remove(buffer.length - 1)
     buffer
   }

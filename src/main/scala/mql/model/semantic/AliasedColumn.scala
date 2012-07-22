@@ -12,6 +12,7 @@ object AliasedColumnCompanion {
     AliasedColumn(table, column)
   }
 
+  import Alias.byName
   implicit def columnToAlias(column: Column) = AliasedColumn(Alias(column.table), Alias(column))
 
   implicit def aliasToSql(column: AliasedColumn) = {

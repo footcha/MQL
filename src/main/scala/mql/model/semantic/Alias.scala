@@ -8,15 +8,19 @@ package mql.model.semantic
 
 import mql.StringFormatter.RichFormatter
 
-object AliasCompanion {
-  implicit def entityToAlias[T <: Name](entity: T) = {
-    Alias(entity)
-  }
+object Alias {
+  implicit def entityToAlias[T <: Name](entity: T) =  Alias(entity)
 
-  def byName[T <: Name]: T => String = entity => entity.name
+  implicit def byName: Name => String = entity => entity.name
+
+  val extract = new {
+    def unapply(alias: Alias[_ <: Name]): Option[(_ <: Name, String)] = {
+      Some(alias.entity, alias.alias)
+    }
+  }
 }
 
-case class Alias[+T <: Name](entity: T, aliasTemplate: Name => String = AliasCompanion.byName)
+case class Alias[+T <: Name](entity: T)(implicit aliasTemplate: Name => String)
   extends SqlConvertible {
 
   val alias = aliasTemplate(entity)
@@ -30,11 +34,4 @@ case class Alias[+T <: Name](entity: T, aliasTemplate: Name => String = AliasCom
     else entity.name
 
   override def toString = toSql
-
-  override def equals(obj: Any): Boolean = {
-    obj match {
-      case that: Alias[_] => that.toSql == toSql
-      case _ => false
-    }
-  }
 }

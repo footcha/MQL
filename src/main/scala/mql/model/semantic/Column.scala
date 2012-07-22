@@ -7,14 +7,6 @@
 package mql.model.semantic
 
 object Column {
-  @deprecated
-  var name = (table: Table, name: String) => apply(table, name)
-
-  def apply(table: Table, columnName: String) = {
-    val tableLocal = table
-    new Column(columnName) { this.table = tableLocal }
-  }
-
   implicit def columnToSql(column: Column): SqlConvertible = {
     new SqlConvertible {
       def toSql = column.table.name + "." + column.name
@@ -29,11 +21,6 @@ object Column {
   }
 }
 
-import mql.Checker._
-case class Column(override val name: String) extends Name {
-  var _table: Table = null // TODO Table is mandatory. Extend ctor with table.
-  def table = ensureNotNull(_table)
-  def table_=(table: Table) {
-    withNotNull(table) { _table = table }
-  }
+case class Column(table: Table, override val name: String) extends Name {
+  table.columns += this
 }

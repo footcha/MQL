@@ -18,7 +18,7 @@ object TableColumns {
   }
 }
 
-class Table(override val name: String)
+case class Table(override val name: String)
   extends Metadata
   with Name
   with Comment
@@ -30,7 +30,5 @@ class Table(override val name: String)
   }
   val primaryKey: Buffer[Column] = new ListBuffer[Column]
 
-  protected def createColumn(name: String) = new Column(name) {
-    table = thisTable
-  }
+  protected def createColumn(name: String) = Column(thisTable, name)
 }

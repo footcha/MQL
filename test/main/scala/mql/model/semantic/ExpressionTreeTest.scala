@@ -6,9 +6,10 @@
  */
 package mql.model.semantic
 
-import org.scalatest.FunSuite
+import org.scalatest.{FlatSpec, FunSuite}
 import ColumnExpression._
 import AliasedColumnCompanion.columnToAlias
+import collection.mutable.ListBuffer
 
 class ExpressionTreeTest extends FunSuite {
   implicit def intToExpression(obj: Int) = ConstantExpression(obj.toString)
@@ -48,5 +49,14 @@ class ExpressionTreeTest extends FunSuite {
     test("Length test: " + testedObject.getClass.getName) {
       testedObject.children should have length expectedLength
     }
+  }
+
+  test("Concatenate children") {
+    import org.scalatest.matchers.ShouldMatchers._
+    implicit val sep = Separator("X")
+    val con = Concatenate(colExp1, colExp2)
+
+    val expected = List(colExp1, sep, colExp2)
+    con.children should equal (expected)
   }
 }

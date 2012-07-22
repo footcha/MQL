@@ -31,7 +31,7 @@ trait ColumnMappings extends Iterable[ColumnMapping] {
         columnMapping.mapping = mapping
         columns += ((columnMapping.column.name, columnMapping))
       }
-      case Some(col) => sys.error("Column [" + col.column.toSql + "] already defined")
+      case Some(col) => sys.error("Mapping for column [" + col.column.toSql + "] is already defined.")
     }
   }
 
