@@ -25,6 +25,11 @@ object ConstantExpression {
 
 case class ConstantExpression(constant: String) extends CommandExpression
 
+
+object Separator {
+  implicit val convert = Separator("#")
+}
+
 case class Separator(override val constant: String) extends ConstantExpression(constant)
 
 case class Concatenate(commands: CommandExpression*)(implicit separator: Separator)
@@ -51,7 +56,7 @@ case class Or(condition1: BooleanExpression, condition2: BooleanExpression, cond
   children += condition1 += condition2 ++= conditions
 }
 
-abstract case class BinaryExpression(left: ExpressionTree, right: ExpressionTree)
+case class BinaryExpression(left: ExpressionTree, right: ExpressionTree)
   extends BooleanExpression {
   children += left += right
 }

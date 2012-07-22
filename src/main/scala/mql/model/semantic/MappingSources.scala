@@ -22,6 +22,10 @@ object JoinType {
   val left = LeftJoin()
   val right = RightJoin()
   val inner = InnerJoin()
+  val undefined = new JoinType {
+    def toSql: String = sys.error("Join type is undefined.")
+    override def toString = "Join type undefined"
+  }
 }
 abstract case class JoinType() extends SqlConvertible
 case class LeftJoin() extends JoinType {
@@ -34,10 +38,9 @@ case class InnerJoin() extends JoinType{
   def toSql: String = "INNER JOIN"
 }
 
-trait Relation extends SqlExpression {
-  def joinType: JoinType = JoinType.left
-  def joinedTable: Alias[Table]
-}
+case class Relation(table: Alias[Table],
+                    joinType: JoinType = JoinType.left,
+                    condition: BooleanExpression)
 
 trait Relations extends Iterable[Relation] {
   def sources: MappingSources
@@ -62,13 +65,13 @@ trait MappingSources { thisMappingSources =>
 
   var groupBy: SqlConvertible = emptySql
 
-  // TODO change it to property
+  // NOTE change it to property
   var activeFlagManipulation = empty
 
   private var _mainSource2 = new ListBuffer[Table]
   def mainSource: Buffer[Table] = _mainSource2
 
-  // TODO change it to property
+  // NOTE change it to property
   var filter = new HashMap[Any,  ListBuffer[SqlConvertible]] with SqlConvertible {
     override def apply(key: Any) = {
       getOrElseUpdate(key, new ListBuffer[SqlConvertible])

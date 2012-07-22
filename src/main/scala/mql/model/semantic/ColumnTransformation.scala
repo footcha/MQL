@@ -6,17 +6,14 @@
  */
 package mql.model.semantic
 
+// TODO Replace it with CommandExpression
 abstract case class ColumnTransformation()
-
-trait Tokenized {
-  def columns: Iterable[AliasedColumn]
-}
 
 case class ConstantTransformation(constant: String) extends ColumnTransformation
 case class TokenizedTransformation(sql: String, columnsSeq: (Symbol, AliasedColumn)*)
-  extends ColumnTransformation with Tokenized {
+  extends ColumnTransformation {
   lazy val columnMap = columnsSeq.toMap
-  lazy val columns= columnMap.values
+  lazy val columns = columnMap.values
 }
 
 object TokenizedTransformation {
@@ -25,8 +22,4 @@ object TokenizedTransformation {
   }
 }
 
-case class NoTransformation(column: AliasedColumn)
-  extends ColumnTransformation
-  with Tokenized {
-  def columns: Iterable[AliasedColumn] = List(column)
-}
+case class NoTransformation(column: AliasedColumn) extends ColumnTransformation

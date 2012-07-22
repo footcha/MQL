@@ -30,6 +30,7 @@ abstract case class ExpressionTree() { thisNode =>
     private[this] val _underlying = new ArrayBuffer[ExpressionTree]
 
     def +=(elem: ExpressionTree): this.type = {
+//      if (elem == null) throw new NullPointerException("Null element is forbidden as child in expression tree.")
       _underlying += elem
       elem.parent = thisNode
       this

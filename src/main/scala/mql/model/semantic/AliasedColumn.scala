@@ -7,10 +7,7 @@
 package mql.model.semantic
 
 object AliasedColumnCompanion {
-  implicit def tupleToAlias(tuple: (Alias[Column], Alias[Table])) = {
-    val (column, table) = tuple
-    AliasedColumn(table, column)
-  }
+  def alias(table: Alias[Table], column: Alias[Column]) = AliasedColumn(table, column)
 
   import Alias.byName
   implicit def columnToAlias(column: Column) = AliasedColumn(Alias(column.table), Alias(column))
