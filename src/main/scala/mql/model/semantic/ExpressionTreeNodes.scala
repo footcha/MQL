@@ -27,13 +27,12 @@ case class ConstantExpression(constant: String) extends CommandExpression
 
 case class Separator(override val constant: String) extends ConstantExpression(constant)
 
-case class Concatenate(command1: CommandExpression, command2: CommandExpression, commands: CommandExpression*)(implicit separator: Separator)
+case class Concatenate(commands: CommandExpression*)(implicit separator: Separator)
   extends CommandExpression {
-  children ++= concatenate()
-
-  private[this] def concatenate():Iterable[CommandExpression] = {
+  assert(commands.length >= 2, "Concatenation is possible only for at least 2 commands." + commands.length + " given instead.")
+  children ++= {
     val buffer = new ListBuffer[CommandExpression]
-    buffer ++= command1 :: command2 :: commands.toList flatMap (List(_, separator))
+    buffer ++= commands.toList flatMap (List(_, separator))
     buffer.remove(buffer.length - 1)
     buffer
   }
