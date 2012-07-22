@@ -6,7 +6,7 @@
  */
 package mql.model.semantic
 
-case class Evaluation(val code: Any)
+case class Evaluation(code: Any)
 
 object StandardEvaluation {
   val simple = Evaluation("Low")

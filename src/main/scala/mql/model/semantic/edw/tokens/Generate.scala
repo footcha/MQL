@@ -6,8 +6,8 @@
  */
 package mql.model.semantic.edw.tokens
 
-import mql.model.semantic.{ColumnTransformation, SourceSystem}
+import mql.model.semantic.{ConstantExpression, CommandExpression, SourceSystem}
 
-case class Generate() extends ColumnTransformation
+object Generate extends CommandExpression
 
-case class SourceSystemTransformation(system: SourceSystem) extends ColumnTransformation
+case class SourceSystemTransformation(system: SourceSystem) extends ConstantExpression(system.code)

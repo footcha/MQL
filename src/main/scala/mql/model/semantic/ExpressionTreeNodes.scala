@@ -25,6 +25,19 @@ object ConstantExpression {
 
 case class ConstantExpression(constant: String) extends CommandExpression
 
+import ColumnExpression.columnAlias2ColumnExpression
+case class TokenizedExpression(sql: String, columnsSeq: (Symbol, AliasedColumn)*)
+  extends CommandExpression {
+  lazy val columnMap = columnsSeq.toMap
+  lazy val columns = columnMap.values
+  children ++= columns.map(columnAlias2ColumnExpression(_))
+}
+
+object TokenizedExpression {
+  val extract = new {
+    def unapply(t: TokenizedExpression): Option[(String, Seq[(Symbol, AliasedColumn)])] = Some(t.sql, t.columnMap.toSeq)
+  }
+}
 
 object Separator {
   implicit val convert = Separator("#")
