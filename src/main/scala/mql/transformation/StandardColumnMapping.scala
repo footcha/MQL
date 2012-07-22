@@ -8,12 +8,12 @@ package mql.transformation
 
 import mql.model.semantic._
 
-object StandardColumnTransformation {
+object StandardColumnMapping {
   def oneToOne(from: AliasedColumn, to: Column): ColumnMapping = {
     new ColumnMapping {
       column = to
       mappedTo += from.column.entity
-      transformation = NoTransformation(from)
+      transformation = ColumnExpression(from)
     }
   }
 
@@ -22,7 +22,7 @@ object StandardColumnTransformation {
       column = column1
       mappedTo += from.column.entity
       mappedTo += to.column.entity
-      transformation = TokenizedTransformation("", 'from -> from, 'to -> to)
+      transformation = TokenizedExpression("", 'from -> from, 'to -> to)
     }
   }
 }
