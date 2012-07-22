@@ -29,15 +29,23 @@ class Expression2Sql(private val expression: BooleanExpression) extends SqlConve
   protected def process(expression: BinaryExpression): String = {
     val operator = expression match {
       case e: Equal => "="
+      case e: NotLike => "NOT LIKE"
+      case e => e.getClass.getName.toUpperCase
     }
     val BinaryExpression(left, right) = expression
     traverse(left) + " " + operator + " " + traverse(right)
   }
 
   protected def process(expression: BooleanExpression): String = {
-    expression match {
-      case And(left, right) => "(" + traverse(left) + " AND " + traverse(right) + ")"
-      case Or(left, right) => "(" + traverse(left) + " OR " + traverse(right) + ")"
+    import mql.StringFormatter.RichFormatter
+    val (left, operator, right) = expression match {
+      case And(l, r) => (l, "AND", r)
+      case Or(l, r)  => (l, "OR",  r)
     }
+    "({left} {operator} {right})" richFormat (
+      'left -> traverse(left),
+      'operator -> operator,
+      'right -> traverse(right)
+      )
   }
 }
