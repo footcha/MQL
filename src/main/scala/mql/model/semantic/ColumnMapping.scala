@@ -37,13 +37,13 @@ trait ColumnMapping extends Metadata with Comment {
 
   def apply(label: String): Any = metadata(prefix + label)
 
-  def transformation: CommandExpression = apply("Transformation").asInstanceOf[() => CommandExpression]()
+  def transformation: Node = apply("Transformation").asInstanceOf[() => Node]()
 
-  def transformation_=(value: => CommandExpression) {
+  def transformation_=(value: => Node) {
     setMetadata("Transformation", () => value)
   }
 
-  transformation = ConstantExpression("")
+  transformation = EmptyNode
 
   @deprecated
   def mappedTo: mutable.MutableList[Column] = _mappedTo

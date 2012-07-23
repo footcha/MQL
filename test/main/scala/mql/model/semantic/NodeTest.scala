@@ -6,30 +6,29 @@
  */
 package mql.model.semantic
 
-import org.scalatest.{FlatSpec, FunSuite}
-import ColumnExpression._
+import org.scalatest.FunSuite
+import ColumnNode._
 import AliasedColumnCompanion.columnToAlias
-import collection.mutable.ListBuffer
 
-class ExpressionTreeTest extends FunSuite {
-  implicit def intToExpression(obj: Int) = ConstantExpression(obj.toString)
+class NodeTest extends FunSuite {
+  implicit def intToExpression(obj: Int) = StringNode(obj.toString)
 
   val table = new Table("TestTable")
-  val col1: AliasedColumn = Column(table, "TestColumn1")
-  val col2: AliasedColumn = Column(table, "TestColumn2")
-  val col3: AliasedColumn = Column(table, "TestColumn3")
+  val col1: ColumnAlias = Column(table, "TestColumn1")
+  val col2: ColumnAlias = Column(table, "TestColumn2")
+  val col3: ColumnAlias = Column(table, "TestColumn3")
   // Example:
   // (col1 = col2 AND col2 = 2) OR col2 > col1
   val complexCond = Or(And(Equal(col1, col2), Equal(col2, 2)), >(col2, col1))
 
-  val constant = ConstantExpression("constant")
-  val colExp1 = ColumnExpression(col1)
-  val colExp2 = ColumnExpression(col2)
-  val colExp3 = ColumnExpression(col3)
+  val constant = StringNode("constant")
+  val colExp1 = ColumnNode(col1)
+  val colExp2 = ColumnNode(col2)
+  val colExp3 = ColumnNode(col3)
 
   import org.scalatest.matchers.ShouldMatchers._
   test("Parents is set") {
-    def testChildren(parent: ExpressionTree) {
+    def testChildren(parent: Node) {
       for (val child <- parent.children) {
         child.parent should be === parent
         testChildren(child)
@@ -53,8 +52,8 @@ class ExpressionTreeTest extends FunSuite {
 
   test("Concatenate children") {
     import org.scalatest.matchers.ShouldMatchers._
-    implicit val sep = Separator("X")
-    val con = Concatenate(colExp1, colExp2)
+    implicit val sep = SeparatorNode("X")
+    val con = ConcatenationNode(colExp1, colExp2)
 
     val expected = List(colExp1, sep, colExp2)
     con.children should equal (expected)

@@ -7,36 +7,38 @@
 package mql.transformation
 
 import mql.model.semantic._
-import mql.model.semantic.BooleanExpression
-import mql.model.semantic.ExpressionTree
+import mql.model.semantic.BooleanNode
+import mql.model.semantic.Node
 
-class Expression2Sql(private val expression: BooleanExpression) extends SqlConvertible {
+class Expression2Sql(private val expression: BooleanNode) extends SqlConvertible {
   def toSql: String = traverse(expression)
 
-  private def traverse(expression: ExpressionTree): String = {
+  private def traverse(expression: Node): String = {
     import AliasedColumnCompanion.aliasToSql
     expression match {
-      case e: BinaryExpression => process(e)
-      case e: BooleanExpression => process(e)
-      case ColumnExpression(column) => column.toSql
-      case e: ConstantExpression => process(e)
+      case e: BinaryNode => process(e)
+      case e: BooleanNode => process(e)
+      case ColumnNode(column) => column.toSql
+      case e: ConstantNode => process(e)
       case t => sys.error("should not get here: " + t)
     }
   }
 
-  protected def process(expression: ConstantExpression) =  "'" + expression.constant + "'"
+  protected def process(expression: ConstantNode): String = expression match {
+    case StringNode(s) => "'" + s + "'"
+  }
 
-  protected def process(expression: BinaryExpression): String = {
+  protected def process(expression: BinaryNode): String = {
     val operator = expression match {
       case e: Equal => "="
       case e: NotLike => "NOT LIKE"
       case e => e.getClass.getName.toUpperCase
     }
-    val BinaryExpression(left, right) = expression
+    val BinaryNode(left, right) = expression
     traverse(left) + " " + operator + " " + traverse(right)
   }
 
-  protected def process(expression: BooleanExpression): String = {
+  protected def process(expression: BooleanNode): String = {
     import mql.StringFormatter.RichFormatter
     val (left, operator, right) = expression match {
       case And(l, r) => (l, "AND", r)

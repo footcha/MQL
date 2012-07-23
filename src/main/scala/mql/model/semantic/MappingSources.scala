@@ -40,7 +40,7 @@ case class InnerJoin() extends JoinType{
 
 case class Relation(table: Alias[Table],
                     joinType: JoinType = JoinType.left,
-                    condition: BooleanExpression)
+                    condition: BooleanNode)
 
 trait Relations extends Iterable[Relation] {
   def sources: MappingSources

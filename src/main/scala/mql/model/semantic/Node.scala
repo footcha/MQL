@@ -10,26 +10,26 @@ import collection.mutable
 import collection.mutable.ArrayBuffer
 import collection.generic.SeqForwarder
 
-abstract case class ExpressionTree() { thisNode =>
+abstract class Node { thisNode =>
 
-  private[this] var _parent: ExpressionTree = thisNode
+  private[this] var _parent: Node = thisNode
 
   /**
    * Gets parent node of this node.
    * If this node has no parent then parent() returns this node.
    */
-  def parent: ExpressionTree = _parent
+  def parent: Node = _parent
 
-  private def parent_=(parent: ExpressionTree) {
+  private def parent_=(parent: Node) {
     _parent = parent
   }
 
-  val children = new mutable.ArrayBuilder[ExpressionTree]
-    with SeqForwarder[ExpressionTree]
+  val children = new mutable.ArrayBuilder[Node]
+    with SeqForwarder[Node]
   {
-    private[this] val _underlying = new ArrayBuffer[ExpressionTree]
+    private[this] val _underlying = new ArrayBuffer[Node]
 
-    def +=(elem: ExpressionTree): this.type = {
+    def +=(elem: Node): this.type = {
 //      if (elem == null) throw new NullPointerException("Null element is forbidden as child in expression tree.")
       _underlying += elem
       elem.parent = thisNode
@@ -40,8 +40,8 @@ abstract case class ExpressionTree() { thisNode =>
       _underlying.clear()
     }
 
-    def result(): Array[ExpressionTree] = underlying.toArray
+    def result(): Array[Node] = underlying.toArray
 
-    protected override def underlying: Seq[ExpressionTree] = _underlying
+    protected override def underlying: Seq[Node] = _underlying
   }
 }

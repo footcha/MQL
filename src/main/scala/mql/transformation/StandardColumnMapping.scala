@@ -9,20 +9,20 @@ package mql.transformation
 import mql.model.semantic._
 
 object StandardColumnMapping {
-  def oneToOne(from: AliasedColumn, to: Column): ColumnMapping = {
+  def oneToOne(from: ColumnAlias, to: Column): ColumnMapping = {
     new ColumnMapping {
       column = to
       mappedTo += from.column.entity
-      transformation = ColumnExpression(from)
+      transformation = ColumnNode(from)
     }
   }
 
-  def translateOverFor(column1: Column)(from: AliasedColumn, to: AliasedColumn) = {
+  def translateOverFor(column1: Column)(from: ColumnAlias, to: ColumnAlias) = {
     new ColumnMapping {
       column = column1
       mappedTo += from.column.entity
       mappedTo += to.column.entity
-      transformation = TokenizedExpression("", 'from -> from, 'to -> to)
+      transformation = TokenizedNode("", 'from -> from, 'to -> to)
     }
   }
 }

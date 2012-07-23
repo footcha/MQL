@@ -7,19 +7,19 @@
 package mql.model.semantic
 
 object AliasedColumnCompanion {
-  def alias(table: Alias[Table], column: Alias[Column]) = AliasedColumn(table, column)
+  def alias(table: Alias[Table], column: Alias[Column]) = ColumnAlias(table, column)
 
   import Alias.byName
-  implicit def columnToAlias(column: Column) = AliasedColumn(Alias(column.table), Alias(column))
+  implicit def columnToAlias(column: Column) = ColumnAlias(Alias(column.table), Alias(column))
 
-  implicit def aliasToSql(column: AliasedColumn) = {
+  implicit def aliasToSql(column: ColumnAlias) = {
     new SqlConvertible {
       def toSql = column.table.alias + "." + column.column.alias
     }
   }
 }
 
-case class AliasedColumn(table: Alias[Table], column: Alias[Column]) {
+case class ColumnAlias(table: Alias[Table], column: Alias[Column]) {
   if (table.entity != column.entity.table) sys.error("Table alias and column joinedTable are not same.")
 
   def x: SqlConvertible = this.asInstanceOf[SqlConvertible]
