@@ -53,8 +53,7 @@ object False extends BooleanNode
 
 abstract class BooleanNode extends Node
 
-// TODO Make it sealed.
-case class And(condition1: BooleanNode, condition2: BooleanNode, conditions: BooleanNode*)
+sealed case class And(condition1: BooleanNode, condition2: BooleanNode, conditions: BooleanNode*)
   extends BooleanNode {
   children += condition1 += condition2 ++= conditions
 }
