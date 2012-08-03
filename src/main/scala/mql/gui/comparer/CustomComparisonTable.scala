@@ -1,7 +1,7 @@
 package mql.gui.comparer
 
 import javax.swing.{JTable, JLabel}
-import mql.comparer.{XlsRow, ComparedItem}
+import mql.comparer.{Empty, XlsRow, ComparedItem}
 import javax.swing.table.TableCellRenderer
 
 class CustomComparisonTable(override val title: String) extends CollectionComparisonTable(title) {
@@ -23,7 +23,10 @@ class CustomComparisonTable(override val title: String) extends CollectionCompar
     model = new Model(items) {
       type ModelItem = ComparedItem
 
-      def left = (item: ComparedItem) => item.left
+      def left = (item: ComparedItem) => item.left match {
+        case it: Empty => item.right
+        case it => it
+      }
 
       def middle = (item: ComparedItem) => item.middle
     }

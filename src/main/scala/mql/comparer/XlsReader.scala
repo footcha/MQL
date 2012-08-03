@@ -7,8 +7,30 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.{Cell => PoiCell}
 import java.util
 
+trait Empty
+
+object XlsTableMapping {
+
+  object None extends XlsTableMapping(XlsRow.None) with Empty {
+    cells = new mutable.HashMap[Int, String] {
+      override def default(idx: Int) = ""
+    }
+  }
+
+}
+
+object XlsColumnMapping {
+
+  object None extends XlsColumnMapping(XlsRow.None) with Empty {
+    cells = new mutable.HashMap[Int, String] {
+      override def default(idx: Int) = ""
+    }
+  }
+
+}
+
 class XlsTableMapping(val labels: XlsRow) extends XlsRow(labels) {
-  val columns = new mutable.HashMap[String, XlsColumnMapping]
+  var columns = new mutable.HashMap[String, XlsColumnMapping]
 
   def key = cells(2)
 }
@@ -19,8 +41,20 @@ class XlsColumnMapping(val labels: XlsRow) extends XlsRow(labels) {
   def columnCode = cells(5)
 }
 
+object XlsRow {
+
+  object None extends XlsRow(null) with Empty {
+    def key = ""
+
+    cells = new mutable.HashMap[Int, String] {
+      override def default(idx: Int) = ""
+    }
+  }
+
+}
+
 abstract class XlsRow(labels: XlsRow) {
-  val cells = new mutable.HashMap[Int, String]
+  var cells = new mutable.HashMap[Int, String]
 
   def apply(label: String): String = {
     val idx = labels.cells.find(c => c._2 == label).get._1

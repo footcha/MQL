@@ -95,12 +95,13 @@ object ComparerApplication extends SimpleSwingApplication {
           val current = columnsList.items.toList(rowIdx)
           val left = current.left.asInstanceOf[XlsColumnMapping]
           val right = current.right.asInstanceOf[XlsColumnMapping]
-          val labels = left.labels.cells
-          val det = left.cells.toSeq.sortBy(_._1) zip right.cells.toSeq.sortBy(_._1) map (it => {
+          val labels = nonEmpty(left, right).labels.cells
+          val emptyCell = (0, "")
+          val det = left.cells.toSeq.sortBy(_._1) zipAll(right.cells.toSeq.sortBy(_._1), emptyCell, emptyCell) map (it => {
             val left = it._1._2
             val right = it._2._2
-            val label = labels(it._1._1)
-            ComparedItem(label, if (left == right) ComparisonResult.Equal else ComparisonResult.NotEqual, label)
+            val label = labels(if (it._1._2 != "") it._1._1 else it._2._1)
+            ComparedItem(label, comparisonResult(left, right)(""), label)
           })
           columnDetail.items = det
         }
@@ -192,8 +193,8 @@ object ComparerApplication extends SimpleSwingApplication {
     val comparer = new CollectionComparer(xls._1, xls._2) {
       different = (m1, m2) => out += ComparedItem(m1, ComparisonResult.NotEqual, m2)
       same = (m1, m2) => out += ComparedItem(m1, ComparisonResult.Equal, m2)
-      inSecond = m => out += ComparedItem(m, ComparisonResult.LeftOnly, null)
-      inFirst = m => out += ComparedItem(null, ComparisonResult.RightOnly, m)
+      inSecond = m => out += ComparedItem(m, ComparisonResult.LeftOnly, XlsTableMapping.None)
+      inFirst = m => out += ComparedItem(XlsTableMapping.None, ComparisonResult.RightOnly, m)
     }
     comparer.compare(compareTableMapping, interruptor = true)
     mapDetail.items = List()
@@ -225,17 +226,25 @@ object ComparerApplication extends SimpleSwingApplication {
 
   def asXls(obj: Any): XlsTableMapping = obj.asInstanceOf[XlsTableMapping]
 
+  def comparisonResult[T](x: T, y: T)(emptyCell: T) = (x, y) match {
+    case (l, r) if l == r => ComparisonResult.Equal
+    case (_, `emptyCell`) => ComparisonResult.LeftOnly
+    case (`emptyCell`, _) => ComparisonResult.RightOnly
+    case _ => ComparisonResult.NotEqual
+  }
+
   def mappingDetail(rowIdx: Int) {
     val item = mappingsList.items(rowIdx)
     val left = asXls(item.left)
     val right = asXls(item.right)
-    val labels = (if (left != null) left else right).labels.cells
-    //    val det = compare(left.cells, right.cells)
-    val det = left.cells.toSeq.sortBy(_._1) zip right.cells.toSeq.sortBy(_._1) map (it => {
+    val labels = nonEmpty(left, right).labels.cells
+    val emptyCell = (0, "")
+    val det = left.cells.toSeq.sortBy(_._1) zipAll(right.cells.toSeq.sortBy(_._1), emptyCell, emptyCell) map (it => {
+      //      val nonEmpty =
       val left = it._1._2
       val right = it._2._2
-      val label = labels(it._1._1)
-      ComparedItem(label, if (left == right) ComparisonResult.Equal else ComparisonResult.NotEqual, label)
+      val label = labels(if (it._1._2 != "") it._1._1 else it._2._1)
+      ComparedItem(label, comparisonResult(left, right)(emptyCell._2), label)
     })
     mapDetail.items = det
 
@@ -243,12 +252,14 @@ object ComparerApplication extends SimpleSwingApplication {
     val columnComparer = new CollectionComparer(left.columns, right.columns) {
       same = (c1, c2) => out += ComparedItem(c1, ComparisonResult.Equal, c2)
       different = (c1, c2) => out += ComparedItem(c1, ComparisonResult.NotEqual, c2)
-      inFirst = c => out += ComparedItem(c, ComparisonResult.LeftOnly, null)
-      inSecond = c => out += ComparedItem(null, ComparisonResult.RightOnly, c)
+      inFirst = c => out += ComparedItem(c, ComparisonResult.LeftOnly, XlsColumnMapping.None)
+      inSecond = c => out += ComparedItem(XlsColumnMapping.None, ComparisonResult.RightOnly, c)
     }
     columnComparer.compare(compareRow, interruptor = true)
 
     columnsList.items = out
     fieldComparison.text = ""
   }
+
+  private def nonEmpty[T](x: T, y: T) = if (!x.isInstanceOf[Empty]) x else y
 }
