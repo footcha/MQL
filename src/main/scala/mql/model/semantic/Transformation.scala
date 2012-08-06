@@ -29,10 +29,10 @@ trait Transformation {
   //    val id = _
   //    val prefix = _
   //
-  //    private val x = idMetadata
+  //    private val createModelItems = idMetadata
   //    idMetadata = {
   //      () => {
-  //        val xx = x()
+  //        val xx = createModelItems()
   //        xx += Column.name(null, "elem")
   //        xx
   //      }

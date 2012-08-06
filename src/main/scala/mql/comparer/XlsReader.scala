@@ -29,13 +29,13 @@ object XlsColumnMapping {
 
 }
 
-class XlsTableMapping(val labels: XlsRow) extends XlsRow(labels) {
+class XlsTableMapping(override val labels: XlsRow) extends XlsRow(labels) {
   var columns = new mutable.HashMap[String, XlsColumnMapping]
 
   def key = cells(2)
 }
 
-class XlsColumnMapping(val labels: XlsRow) extends XlsRow(labels) {
+class XlsColumnMapping(override val labels: XlsRow) extends XlsRow(labels) {
   def key = cells(3)
 
   def columnCode = cells(5)
@@ -53,7 +53,7 @@ object XlsRow {
 
 }
 
-abstract class XlsRow(labels: XlsRow) {
+abstract class XlsRow(val labels: XlsRow) {
   var cells = new mutable.HashMap[Int, String]
 
   def apply(label: String): String = {
