@@ -11,10 +11,12 @@ import mql.comparer.ComparedItem
 import scala.Some
 import swing.TabbedPane.Page
 import table.TableCellRenderer
+import mql.Version
 
 object SelectedRow {
   def unapply(table: Table): Option[Int] = Some(table.peer.getSelectedRow)
 }
+
 object ComparerApplication extends SimpleSwingApplication {
 
   UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
@@ -67,47 +69,47 @@ object ComparerApplication extends SimpleSwingApplication {
 
     peer.setDefaultCloseOperation(EXIT_ON_CLOSE)
 
-    title = "MQL Comparer 1.0.53"
+    title = "MQL Comparer %s" format Version.version
     iconImage = toolkit.getImage(Utilities.resource("icons/logo32.png"))
 
     initMenuBar(this)
 
     val fieldDetail = new BoxPanel(Orientation.Vertical) {
-        val tableMapping = createFieldDetail("Table mapping field details and differences")
-        val columnMapping = createFieldDetail("Column mapping field details and differences")
-        _contents += tableMapping
-        _contents += columnMapping
-        activateTableMappingField()
+      val tableMapping = createFieldDetail("Table mapping field details and differences")
+      val columnMapping = createFieldDetail("Column mapping field details and differences")
+      _contents += tableMapping
+      _contents += columnMapping
+      activateTableMappingField()
 
-        def activateTableMappingField() {
-          tableMapping.visible = true
-          columnMapping.visible = false
-        }
+      def activateTableMappingField() {
+        tableMapping.visible = true
+        columnMapping.visible = false
+      }
 
-        def activateColumnMappingField() {
-          tableMapping.visible = false
-          columnMapping.visible = true
-        }
+      def activateColumnMappingField() {
+        tableMapping.visible = false
+        columnMapping.visible = true
+      }
 
-        def initReactions() {
-          initReactions(tableMappingDetail, tableMapping.content, mappingsList)
-          initReactions(columnDetail, columnMapping.content, columnsList)
-        }
+      def initReactions() {
+        initReactions(tableMappingDetail, tableMapping.content, mappingsList)
+        initReactions(columnDetail, columnMapping.content, columnsList)
+      }
 
-        private def initReactions[T <: XlsRow](source: CustomComparisonTable, listener: Label, list: CustomComparisonTable) {
-          listener.listenTo(source.table.selection)
-          listener.reactions += {
-            case TableRowsSelected(source @ SelectedRow(rowIdx), range, false) if (rowIdx >= 0) => {
-              val x = list.table.peer.getSelectedRow
-              val l = list.items(x).left.asInstanceOf[T].cells(rowIdx)
-              val r = list.items(x).right.asInstanceOf[T].cells(rowIdx)
-              val diff = new diff_match_patch()
-              val html = diff.diff_prettyHtml(diff.diff_main(l, r))
-              listener.text = "<html>%s</html>" format html
-            }
+      private def initReactions[T <: XlsRow](source: CustomComparisonTable, listener: Label, list: CustomComparisonTable) {
+        listener.listenTo(source.table.selection)
+        listener.reactions += {
+          case TableRowsSelected(source@SelectedRow(rowIdx), range, false) if (rowIdx >= 0) => {
+            val x = list.table.peer.getSelectedRow
+            val l = list.items(x).left.asInstanceOf[T].cells(rowIdx)
+            val r = list.items(x).right.asInstanceOf[T].cells(rowIdx)
+            val diff = new diff_match_patch()
+            val html = diff.diff_prettyHtml(diff.diff_main(l, r))
+            listener.text = "<html>%s</html>" format html
           }
         }
       }
+    }
 
     val mainPane = new SplitPane(Orientation.Vertical) {
       val tabbedPane = new TabbedPane {
@@ -126,7 +128,7 @@ object ComparerApplication extends SimpleSwingApplication {
     contents_=(mainPane)
     mainPane.listenTo(mappingsList.table.selection)
     mainPane.reactions += {
-      case TableRowsSelected(source @ SelectedRow(rowIdx), range, false) if (rowIdx >= 0) => {
+      case TableRowsSelected(source@SelectedRow(rowIdx), range, false) if (rowIdx >= 0) => {
         mappingDetail(rowIdx)
         fieldDetail.tableMapping.content.text = ""
         fieldDetail.columnMapping.content.text = ""
@@ -135,7 +137,7 @@ object ComparerApplication extends SimpleSwingApplication {
     columnDetail.listenTo(columnsList.table.selection)
 
     columnDetail.reactions += {
-      case TableRowsSelected(source @ SelectedRow(rowIdx), range, false) if (rowIdx >= 0) => {
+      case TableRowsSelected(source@SelectedRow(rowIdx), range, false) if (rowIdx >= 0) => {
         val current = columnsList.items.toList(rowIdx)
         columnDetail.items = createModelItems(current)
       }
@@ -162,6 +164,7 @@ object ComparerApplication extends SimpleSwingApplication {
             accelerator = Some(KeyStroke.getKeyStroke("control O"))
 
             lazy val fileChooser = new TwoFilesChooser(frame)
+
             def apply() {
               fileChooser.show() match {
                 case Dialog.Result.Ok => {
@@ -189,7 +192,9 @@ object ComparerApplication extends SimpleSwingApplication {
           action = new Action("Reload") {
             accelerator = Some(KeyStroke.getKeyStroke("F5"))
 
-            def apply() { reload() }
+            def apply() {
+              reload()
+            }
           }
         }
       }
@@ -198,8 +203,10 @@ object ComparerApplication extends SimpleSwingApplication {
         contents += new MenuItem("About") {
           mnemonic = Key.A
           action = new Action("About") {
-            def apply() {
+            accelerator = Some(KeyStroke.getKeyStroke("F1"))
 
+            def apply() {
+              About.visible = true
             }
           }
         }
@@ -274,9 +281,9 @@ object ComparerApplication extends SimpleSwingApplication {
   def createModelItems[TItem <: XlsRow](current: ComparedItem) = {
     def nonEmptyFcn[X](x: X, y: X)(a: Any, b: Any): Any =
       (if (!x.isInstanceOf[Empty]) x else y) match {
-      case `x` => a
-      case `y` => b
-    }
+        case `x` => a
+        case `y` => b
+      }
     def comparisonResult(x: String, y: String)(emptyCell: String) = (x, y) match {
       case (_, `emptyCell`) => ComparisonResult.LeftOnly
       case (`emptyCell`, _) => ComparisonResult.RightOnly

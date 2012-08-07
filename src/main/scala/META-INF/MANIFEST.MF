@@ -1,8 +1,5 @@
 Manifest-Version: 1.0
 Class-Path: scala-library.jar scala-swing.jar scala-dbc.jar poi-3.8-20
- 120326.jar scala-compiler.jar scala-library.jar scala-library.jar sca
- la-swing.jar scala-dbc.jar scala-compiler.jar jline.jar scalap.jar sc
- ala-library.jar scala-swing.jar scala-dbc.jar scala-compiler.jar jlin
- e.jar scalap.jar scalatest_2.9.1-1.8.jar
+ 120326.jar scalatest_2.9.1-1.8.jar
 Main-Class: teradata.gui.comparer.ComparerApplication
 

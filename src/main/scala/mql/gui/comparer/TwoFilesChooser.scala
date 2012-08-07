@@ -1,24 +1,23 @@
 package mql.gui.comparer
 
 import swing._
-import event.{Key, KeyPressed}
 import java.io.File
 import collection.mutable.ListBuffer
 import swing.Dialog.Result
-import java.awt.GridBagConstraints
 import swing.GridBagPanel.Fill
 
-class TwoFilesChooser(private val over: Frame) extends Dialog(over) {
+class TwoFilesChooser(override val owner: Frame) extends Dialog(owner) with CommonDialogBehavior {
   thisFrame =>
   title = "Compare Files"
-  modal = true
   preferredSize = new Dimension(380, 120)
-  resizable = false
-  peer.setIconImage(over.iconImage)
-  centerOnScreen()
+  peer.setIconImage(owner.iconImage)
 
   private var result = Result.Cancel
-  private val okButton = Button("OK") { commit() }
+  private val okButton = Button("OK") {
+    commit()
+  }
+
+  defaultButton = okButton
 
   private val cancelButton = Button("Cancel") {
     thisFrame.visible = false
@@ -59,6 +58,7 @@ class TwoFilesChooser(private val over: Frame) extends Dialog(over) {
         c.weightx = 0
         layout(comp._3) = c
       }
+
       addFileComponent(components._1, 1)
       addFileComponent(components._2, 2)
     }, BorderPanel.Position.Center)
@@ -78,12 +78,7 @@ class TwoFilesChooser(private val over: Frame) extends Dialog(over) {
   }
 
   def fileComponent[T](labelText: String, index: Int) = {
-    val filePath = new TextField() {
-      listenTo(this.keys)
-      reactions += {
-        case KeyPressed(_, Key.Enter, _, _) => commit()
-      }
-    }
+    val filePath = new TextField()
     val chooser = new FileChooser(new File(".")) {
       multiSelectionEnabled = false
       fileSelectionMode = FileChooser.SelectionMode.FilesOnly
