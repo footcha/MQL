@@ -1,5 +1,6 @@
 Manifest-Version: 1.0
-Class-Path: scala-library.jar scala-swing.jar scala-dbc.jar poi-3.8-20
- 120326.jar scalatest_2.9.1-1.8.jar
+Class-Path: logback-access-1.0.6.jar logback-classic-1.0.6.jar logback
+ -core-1.0.6.jar poi-3.8-20120326.jar scala-library.jar scala-swing.ja
+ r slf4j-api-1.6.6.jar
 Main-Class: teradata.gui.comparer.ComparerApplication
 

@@ -6,6 +6,7 @@ import java.io.FileInputStream
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.{Cell => PoiCell}
 import java.util
+import org.slf4j.LoggerFactory
 
 trait Empty
 
@@ -65,6 +66,8 @@ abstract class XlsRow(val labels: XlsRow) {
 }
 
 class XlsReader(val files: (String, String)) {
+  private val logger = LoggerFactory.getLogger(getClass)
+
   def read() = (createStructure(files._1), createStructure(files._2))
 
   protected def cellValue(cell: PoiCell): String = {
@@ -75,13 +78,18 @@ class XlsReader(val files: (String, String)) {
         case PoiCell.CELL_TYPE_NUMERIC => cell.getNumericCellValue.toString
         case PoiCell.CELL_TYPE_BLANK => ""
         case PoiCell.CELL_TYPE_FORMULA => cell.getCellFormula // TODO
-        case e => sys.error(e.toString)
+        case cellType => {
+          logger.error("Cell ({}, {}) is of invalid type {}.",
+            Array(cell.getRowIndex, cell.getColumnIndex, cellType))
+          "<error>"
+        }
       }
     }
   }
 
   protected def readRow[T <: XlsRow](iterator: util.Iterator[Row], creator: => T): T = {
     val row = iterator.next()
+    logger.debug("Row {} with {} columns was successfully read.", row.getRowNum, row.getLastCellNum)
     val newRow = creator
     for (val cellIdx <- row.getFirstCellNum until row.getLastCellNum) {
       val cell = row.getCell(cellIdx)
@@ -91,9 +99,12 @@ class XlsReader(val files: (String, String)) {
   }
 
   private def createStructure(fileName: String): mutable.HashMap[String, XlsTableMapping] = {
+    logger.debug("Opening file {}.", fileName)
     val file = new FileInputStream(fileName)
+    logger.debug("Reading workbook from file {}", fileName)
     val wb = new HSSFWorkbook(file)
     file.close()
+    logger.debug("Retrieving sheet 'TableMap'.")
     val tableMap = wb.getSheet("TableMap")
 
     var iter = tableMap.rowIterator()
@@ -104,16 +115,19 @@ class XlsReader(val files: (String, String)) {
       tableMappings(row.key) = row
     }
 
+    logger.debug("Retrieving sheet 'ColMap'.")
     val columnMap = wb.getSheet("ColMap")
     iter = columnMap.rowIterator()
     val head2 = readRow(iter, new XlsColumnMapping(null))
+    var i = 1
     while (iter.hasNext) {
       val row = readRow(iter, new XlsColumnMapping(head2))
       row.cells.get(0) match {
         case Some(_) => tableMappings(row.key).columns += ((row.columnCode, row))
-        case None =>
+        case None => logger.warn("Sheet 'ColMap' in file '{}' contains empty row {}.",
+          fileName, i)
       }
-
+      i += 1
     }
     tableMappings
   }

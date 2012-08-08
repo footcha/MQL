@@ -12,12 +12,50 @@ import scala.Some
 import swing.TabbedPane.Page
 import table.TableCellRenderer
 import mql.Version
+import java.lang.Thread.UncaughtExceptionHandler
+import org.slf4j.LoggerFactory
+import swing.Dialog.Message
+import org.slf4j.impl.StaticLoggerBinder
+import ch.qos.logback.classic.LoggerContext
 
 object SelectedRow {
   def unapply(table: Table): Option[Int] = Some(table.peer.getSelectedRow)
 }
 
 object ComparerApplication extends SimpleSwingApplication {
+  private val logger = LoggerFactory.getLogger(getClass)
+
+  object ErrorConsole extends Dialog {
+    title = "Error console"
+
+    val txt = new TextArea {
+      rows = 20
+      columns = 50
+      font = font.deriveFont(0, (font.getSize * 1.5).round)
+    }
+    contents_=(new ScrollPane(txt))
+  }
+
+  Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler {
+    def getFullMessage(e: Throwable) = {
+      val b = new StringBuilder
+      var exTmp = e
+      while (exTmp != null) {
+        b append "Caused by " append exTmp.getClass append ": " append exTmp.getMessage append "\n"
+        b appendAll exTmp.getStackTrace.flatMap(st => {
+          "\t at %s.%s (%s:%d)\n" format(st.getClassName, st.getMethodName, st.getFileName, st.getLineNumber)
+        })
+        exTmp = exTmp.getCause
+      }
+      b.toString()
+    }
+
+    def uncaughtException(t: Thread, e: Throwable) {
+      logger.error("Application error.", e)
+      ErrorConsole.txt.text += getFullMessage(e)
+      ErrorConsole.visible = true
+    }
+  })
 
   UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
 
@@ -227,6 +265,7 @@ object ComparerApplication extends SimpleSwingApplication {
 
   def comparedMappings(): List[ComparedItem] = {
     val xls = new XlsReader(files).read()
+    logger.debug("Starting comparing mappings")
     val out = new ListBuffer[ComparedItem]
     val comparer = new CollectionComparer(xls._1, xls._2) {
       different = (m1, m2) => out += ComparedItem(m1, ComparisonResult.NotEqual, m2)
@@ -235,6 +274,7 @@ object ComparerApplication extends SimpleSwingApplication {
       inFirst = m => out += ComparedItem(XlsTableMapping.None, ComparisonResult.RightOnly, m)
     }
     comparer.compare(compareTableMapping, interruptor = true)
+    logger.debug("Finished comparing mappings")
     out.toList
   }
 
