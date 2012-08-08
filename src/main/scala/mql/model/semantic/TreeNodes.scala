@@ -11,9 +11,9 @@ import collection.mutable.ListBuffer
 /**
  * Expression nodes, e.g. raw strings or integers
  */
-object EmptyNode extends Node
+case object EmptyNode extends Node
 
-object NullNode extends Node
+case object NullNode extends Node
 
 object ColumnNode {
   implicit def columnAlias2ColumnExpression(column: ColumnAlias) = ColumnNode(column)
@@ -47,9 +47,9 @@ object BooleanNode {
   }
 }
 
-object True extends BooleanNode
+case object True extends BooleanNode
 
-object False extends BooleanNode
+case object False extends BooleanNode
 
 abstract class BooleanNode extends Node
 

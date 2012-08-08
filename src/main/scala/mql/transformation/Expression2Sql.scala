@@ -7,47 +7,68 @@
 package mql.transformation
 
 import mql.model.semantic._
-import mql.model.semantic.BooleanNode
-import mql.model.semantic.Node
+import mql.model.semantic.Or
+import mql.model.semantic.And
+import mql.model.semantic.Equal
+import mql.model.semantic.NotLike
+import mql.Todo
 
-class Expression2Sql(private val expression: BooleanNode) extends SqlConvertible {
-  def toSql: String = traverse(expression)
+class Expression2Sql(private val expression: Node) extends SqlConvertible {
+  def toSql: String = processNode(expression)
 
-  private def traverse(expression: Node): String = {
+  protected def processNode(expression: Node): String = {
     import AliasedColumnCompanion.aliasToSql
     expression match {
-      case e: BinaryNode => process(e)
-      case e: BooleanNode => process(e)
+      case NullNode => "IS NULL"
+      case e: BinaryNode => processBinaryNode(e)
+      case e: BooleanNode => processBooleanNode(e)
       case ColumnNode(column) => column.toSql
-      case e: ConstantNode => process(e)
-      case t => sys.error("should not get here: " + t)
+      case e: ConstantNode => processConstantNode(e)
+      case node => processUnknownNode(node)
     }
   }
 
-  protected def process(expression: ConstantNode): String = expression match {
+  protected def processConstantNode(expression: ConstantNode): String = expression match {
     case StringNode(s) => "'" + s + "'"
   }
 
-  protected def process(expression: BinaryNode): String = {
+  protected def processBinaryNode(expression: BinaryNode): String = {
     val operator = expression match {
       case e: Equal => "="
       case e: NotLike => "NOT LIKE"
       case e => e.getClass.getName.toUpperCase
     }
     val BinaryNode(left, right) = expression
-    traverse(left) + " " + operator + " " + traverse(right)
+    if (left == NullNode || right == NullNode) Todo("NullNode binary comparison is not implemented yet.")
+    processNode(left) + " " + operator + " " + processNode(right)
   }
 
-  protected def process(expression: BooleanNode): String = {
-    import mql.StringFormatter.RichFormatter
-    val (left, operator, right) = expression match {
-      case And(l, r) => (l, "AND", r)
-      case Or(l, r)  => (l, "OR",  r)
+  protected def processBooleanNode(expression: BooleanNode): String = {
+    expression match {
+      case True => "1"
+      case False => "0"
+      case And(l, r) => toSqlString(l, "AND", r)
+      case Or(l, r) => toSqlString(l, "OR", r)
+      case node => processUnknownNode(node)
     }
-    "({left} {operator} {right})" richFormat (
-      'left -> traverse(left),
+  }
+
+  protected def processUnknownNode(node: Node): String = {
+    throw new InvalidNodeException(node)
+  }
+
+  protected def processChildren(node: Node): String = {
+    (for (val child <- node.children) yield {
+      processNode(child)
+    }).mkString
+  }
+
+  protected def toSqlString(left: BooleanNode, operator: String, right: BooleanNode) = {
+    import mql.StringFormatter.RichFormatter
+    "({left} {operator} {right})" richFormat(
+      'left -> processNode(left),
       'operator -> operator,
-      'right -> traverse(right)
+      'right -> processNode(right)
       )
   }
 }
