@@ -11,4 +11,3 @@ import mql.model.semantic.{Node, ConstantNode, SourceSystem}
 object Generate extends Node
 
 sealed case class SourceSystemNode(system: SourceSystem) extends ConstantNode
-

@@ -17,6 +17,7 @@ object StandardColumnMapping {
     }
   }
 
+  @deprecated
   def translateOverFor(column1: Column)(from: ColumnAlias, to: ColumnAlias) = {
     new ColumnMapping {
       column = column1

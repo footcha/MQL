@@ -7,13 +7,20 @@
 package mql.transformation
 
 import mql.model.semantic._
+import edw.StageTable
 import mql.model.semantic.Or
 import mql.model.semantic.And
 import mql.model.semantic.Equal
 import mql.model.semantic.NotLike
 import mql.Todo
+import org.slf4j.LoggerFactory
+
+object Expression2Sql {
+  private val logger = LoggerFactory.getLogger(classOf[Expression2Sql])
+}
 
 class Expression2Sql(private val expression: Node) extends SqlConvertible {
+  import Expression2Sql.logger
   def toSql: String = processNode(expression)
 
   protected def processNode(expression: Node): String = {
@@ -22,7 +29,11 @@ class Expression2Sql(private val expression: Node) extends SqlConvertible {
       case NullNode => "IS NULL"
       case e: BinaryNode => processBinaryNode(e)
       case e: BooleanNode => processBooleanNode(e)
-      case ColumnNode(column) => column.toSql
+      case ColumnNode(column) => {
+        val table = column.table.entity
+        if (!table.isInstanceOf[StageTable]) logger.error("Column mapping of target column %s is not implemented." format column)
+        column.toSql
+      }
       case e: ConstantNode => processConstantNode(e)
       case node => processUnknownNode(node)
     }
